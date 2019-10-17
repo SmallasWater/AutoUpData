@@ -13,5 +13,5 @@ import updata.AutoData;
  * @parm String project 工程名称
  * @return 是否更新完毕 
  */
-AutoData.getMain().toUpData(plugin,user,project);
+AutoData.get(plugin,user,project);
 ```
