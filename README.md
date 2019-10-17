@@ -6,11 +6,12 @@
 ## 如何使用
 执行以下代码
 ```
+import updata.Main;
 /**
  * @parm PluginBase plugin
  * @parm String user GitHub用户名
  * @parm String project 工程名称
  * @return 是否更新完毕 
  */
-updata.Main.toUpData(plugin,user,project);
+Main.toUpData(plugin,user,project);
 ```
