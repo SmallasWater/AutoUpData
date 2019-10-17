@@ -6,12 +6,12 @@
 ## 如何使用
 执行以下代码
 ```
-import updata.Main;
+import updata.AutoData;
 /**
  * @parm PluginBase plugin
  * @parm String user GitHub用户名
  * @parm String project 工程名称
  * @return 是否更新完毕 
  */
-Main.toUpData(plugin,user,project);
+AutoData.getMain().toUpData(plugin,user,project);
 ```
