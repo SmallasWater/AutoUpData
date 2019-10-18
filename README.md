@@ -39,6 +39,11 @@ data.canUpdate();
 */
 data.getNewVersion();
 /*
+* 获取更新内容
+* @return String 更新内容
+*/
+data.getNewVersionMessage();
+/*
 * 使插件更新
 */
 data.toUpData();
