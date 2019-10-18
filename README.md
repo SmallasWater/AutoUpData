@@ -16,7 +16,7 @@ loadbefore:
 ```
 import updata.AutoData;
 /**
-* @parm File 更新插件的文件位置 (PluginBase 有 getFile() 方法)
+* @parm file 更新插件的文件位置 (PluginBase 有 getFile() 方法)
 * @parm user GitHub用户名
 * @parm project 工程名称 不是插件名
 * @return 是否更新完毕
