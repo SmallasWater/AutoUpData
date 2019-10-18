@@ -18,7 +18,7 @@ import updata.AutoData;
 /**
 * @parm PluginBase plugin
 * @parm String user GitHub用户名
-* @parm String project 工程名称
+* @parm String project 工程名称 不是插件名
 * @return 是否更新完毕
 * 获取接口
 */
