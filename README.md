@@ -11,6 +11,7 @@ loadbefore:
   - AutoUpData
 ```
 否则会出现null异常BUG
+
 执行以下代码
 ```
 import updata.AutoData;
