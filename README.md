@@ -16,6 +16,7 @@ loadbefore:
 ```
 import updata.AutoData;
 /**
+* @parm plugin PluginBase
 * @parm file 更新插件的文件位置 (PluginBase 有 getFile() 方法)
 * @parm user GitHub用户名
 * @parm project 工程名称 不是插件名
@@ -25,7 +26,7 @@ import updata.AutoData;
 /**
 * 获取接口前请先判断插件是否存在
 */
-UpData data = AutoData.get(file,user,project);
+UpData data = AutoData.get(plugin,file,user,project);
 /**
 * 在使用data参数前请先判断是否为null
 */
