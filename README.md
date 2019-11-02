@@ -49,4 +49,22 @@ data.getNewVersionMessage();
 * 使插件更新
 */
 data.toUpData();
+
+/*
+* 使插件更新
+* @param canReload 是否重启插件
+*/
+data.toUpData(canReload);
+
+ /**
+     * @param plugin 插件
+     * @param file 更新插件的路径
+     * @param user GitHub用户名
+     * @param project 工程名
+     *
+     * 直接对插件进行更新 如果需要更详细的设置 请用  {@link UpData} 方法
+     *
+     * @return true 为 更新成功 建议在 onEnable 直接跳出 否则会有报错 false 是更新失败
+     * */
+AutoData.defaultUpData(plugin,file,user,project); 
 ```
