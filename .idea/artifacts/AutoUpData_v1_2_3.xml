@@ -3,7 +3,7 @@
     <output-path>F:/Nukkit开服/plugins</output-path>
     <root id="archive" name="AutoUpData_v1.2.3.jar">
       <element id="module-output" name="AutoUpData" />
-      <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/plugin.yml" />
     </root>
   </artifact>
 </component>
