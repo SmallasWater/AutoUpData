@@ -3,10 +3,6 @@ package updata.utils;
 import cn.nukkit.Server;
 import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginBase;
-import cn.nukkit.utils.ConfigSection;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import updata.AutoData;
 
 import java.io.*;
@@ -14,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -22,107 +19,60 @@ import java.util.*;
  * @author 若水
  * 此文件可以调用开发者的 GitHub仓库实现插件的自动更新
  */
-public class UpData {
+public abstract class UpData {
 
+    protected String pluginVersion;
 
-    private static final String GIT_URL = "https://api.github.com/repos/{user}/{project}/releases/latest";
+    protected PluginBase plugin;
 
-    private String pluginVersion;
+    protected static final String PLUGIN_NAME = "AutoUpData";
 
-    private ConfigSection config;
+    protected File file;
 
-    private PluginBase plugin;
-
-    private static final String PLUGIN_NAME = "AutoUpData";
-
-    private File file;
-
-
-    private UpData(PluginBase plugin, ConfigSection section) {
+    protected UpData(PluginBase plugin) {
         pluginVersion = plugin.getDescription().getVersion();
-        this.config = section;
         this.plugin = plugin;
     }
 
-    private UpData(PluginBase plugin, File file, ConfigSection section) {
+    protected UpData(PluginBase plugin, File file) {
         pluginVersion = plugin.getDescription().getVersion();
-        this.config = section;
         this.plugin = plugin;
         this.file = file;
     }
 
-    private UpData(File file, String pluginVersion, ConfigSection section) {
+    protected UpData(File file, String pluginVersion) {
         this.file = file;
-        this.config = section;
         this.pluginVersion = pluginVersion;
     }
 
-    public String getNewVersion() {
-        String version = config.getString("tag_name");
-        if (version.split("v").length > 1) {
-            return version.split("v")[1];
-        } else {
-            return version;
-        }
-    }
+    public abstract String getUpdateType();
 
-
-    private String getPluginVersion() {
+    protected String getPluginVersion() {
         return pluginVersion;
     }
 
-    private static String loadJson(String user, String project) {
-        StringBuilder json = new StringBuilder();
-        try {
-            URL urlObject = new URL(GIT_URL.replace("{user}", user).replace("{project}", project));
-            URLConnection uc = urlObject.openConnection();
-            uc.setConnectTimeout(30000);
-            uc.setReadTimeout(30000);
-            BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream(), StandardCharsets.UTF_8));
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                json.append(inputLine);
-            }
-            in.close();
-        } catch (Exception e) {
-            return null;
-        }
-        return json.toString();
-    }
-
     /**
-     * @deprecated
+     * @deprecated 被 GitHubUpData#getConfigSection(String, String) 方法代替
      */
+    @Deprecated
     public static UpData getUpData(PluginBase plugin, String user, String project) {
-        ConfigSection section = getConfigSection(user, project);
-        if (section == null) {
-            return null;
-        }
-        return new UpData(plugin, section);
+        return GitHubUpData.getUpData(plugin, user, project);
     }
 
     /**
-     * @deprecated
+     * @deprecated 被 GitHubUpData#getUpData(File, String, String) 方法代替
      */
+    @Deprecated
     public static UpData getUpData(File file, String user, String project) {
-        ConfigSection section = getConfigSection(user, project);
-        if (section == null) {
-            return null;
-        }
-        Plugin plugin = Server.getInstance().getPluginManager().loadPlugin(file);
-        if (plugin != null) {
-            return new UpData(file, plugin.getDescription().getVersion(), section);
-        }
-        return null;
-
+        return GitHubUpData.getUpData(file, user, project);
     }
 
+    /**
+     * @deprecated 被 GitHubUpData#getUpData(PluginBase, File, String, String) 方法代替
+     */
+    @Deprecated
     public static UpData getUpData(PluginBase plugin, File file, String user, String project) {
-        ConfigSection section = getConfigSection(user, project);
-        if (section == null) {
-            return null;
-        }
-        return new UpData(plugin, file, section);
+        return GitHubUpData.getUpData(plugin, file, user, project);
     }
 
     /**
@@ -189,59 +139,37 @@ public class UpData {
         return toUpData(true);
     }
 
-    private static ConfigSection getConfigSection(String user, String project) {
-        String jsonString = loadJson(user, project);
-        if (jsonString == null) {
-            return null;
-        }
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
-        return new ConfigSection(gson.fromJson(jsonString, (new TypeToken<LinkedHashMap<String, Object>>() {
-        }).getType()));
-    }
-
     public boolean canUpdate() {
         return compareVersion(getNewVersion(), pluginVersion) == 1;
     }
 
-    public String getNewVersionMessage() {
-        String strings = config.getString("body");
-        String[] ups = strings.trim().split("\\n");
-        StringBuilder builder = new StringBuilder("\n");
-        for (String s : ups) {
-            builder.append(s).append("\n");
-        }
-        return builder.toString();
-    }
+    /**
+     * @return 获取新版版本号
+     */
+    public abstract String getNewVersion();
 
-    private boolean upData() {
-        List<Map> strings = config.getMapList("assets");
-        Map map = strings.get(0);
-        try {
-            if (file != null) {
-                download((String) map.get("browser_download_url"), Server.getInstance().getPluginPath(), file.getName());
-            } else if (plugin != null) {
-                download((String) map.get("browser_download_url"), Server.getInstance().getPluginPath(), plugin.getName() + "_v" + plugin.getDescription().getVersion() + ".jar");
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
+    /**
+     * @return 获取新版更新信息
+     */
+    public abstract String getNewVersionMessage();
 
+    /**
+     * 更新插件
+     *
+     * @return 更新是否成功
+     */
+    protected abstract boolean upData();
 
     /**
      * 比较版本
      */
-    private int compareVersion(String v1, String v2) {
-        if (v1.equalsIgnoreCase(v2)) {
+    private int compareVersion(String newVersion, String nowVersion) {
+        if (newVersion.equalsIgnoreCase(nowVersion)) {
             return 0;
         }
         try {
-            LinkedList<String> version1Array = new LinkedList<>(Arrays.asList(v1.split("[._-]")));
-            LinkedList<String> version2Array = new LinkedList<>(Arrays.asList(v2.split("[._-]")));
+            LinkedList<String> version1Array = new LinkedList<>(Arrays.asList(newVersion.split("[._-]")));
+            LinkedList<String> version2Array = new LinkedList<>(Arrays.asList(nowVersion.split("[._-]")));
 
             LinkedList<String> version1Suffix = new LinkedList<>();
             LinkedList<String> version2Suffix = new LinkedList<>();
@@ -295,12 +223,12 @@ public class UpData {
                 return diff > 0 ? 1 : -1;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            AutoData.getInstance().getLogger().error("[" + PLUGIN_NAME + "] 版本比较异常", e);
         }
         return -1;
     }
 
-    private static void download(String urlPath, String targetDirectory, String fileName) throws Exception {
+    protected static void download(String urlPath, String targetDirectory, String fileName) throws Exception {
         URL url = new URL(urlPath);
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         http.setConnectTimeout(3000);
@@ -309,7 +237,7 @@ public class UpData {
         InputStream inputStream = http.getInputStream();
 
         byte[] buff = new byte[1024 * 10];
-        OutputStream out = new FileOutputStream(new File(targetDirectory, fileName));
+        OutputStream out = Files.newOutputStream(new File(targetDirectory, fileName).toPath());
         int len;
         while ((len = inputStream.read(buff)) != -1) {
             out.write(buff, 0, len);
@@ -321,6 +249,24 @@ public class UpData {
         http.disconnect();
     }
 
+    protected static String getDataFormUrl(String url) {
+        StringBuilder data = new StringBuilder();
+        try {
+            URL urlObject = new URL(url);
+            URLConnection uc = urlObject.openConnection();
+            uc.setConnectTimeout(30000);
+            uc.setReadTimeout(30000);
+            BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream(), StandardCharsets.UTF_8));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                data.append(inputLine);
+            }
+            in.close();
+        } catch (Exception e) {
+            return null;
+        }
+        return data.toString();
+    }
 
 }
 
