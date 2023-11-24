@@ -2,7 +2,6 @@ package updata.utils;
 
 import cn.nukkit.Server;
 import cn.nukkit.plugin.PluginBase;
-import updata.AutoData;
 
 import java.io.File;
 import java.util.*;
@@ -57,18 +56,27 @@ public class MavenUpData extends UpData {
             }
 
             //指定版本后缀时，重新检查符合要求的最新版本
-            if (versionSuffix != null && !lastVersion.contains(versionSuffix)) {
-                lastVersion = "0.0.0";
-                for (String version : versions) {
-                    if (version.contains(versionSuffix) && compareVersion(version, lastVersion) > 0) {
-                        lastVersion = version;
-                        break;
+            if (versionSuffix != null) {
+                if (!lastVersion.contains(versionSuffix)) {
+                    lastVersion = "0.0.0";
+                    for (String version : versions) {
+                        if (version.contains(versionSuffix) && compareVersion(version, lastVersion) > 0) {
+                            lastVersion = version;
+                        }
+                    }
+                }
+            } else {
+                String regex = "([0-9]*)\\.([0-9]*)\\.([0-9]*)\\.?([0-9]*)(-SNAPSHOT)?";
+                if (!lastVersion.matches(regex)) {
+                    lastVersion = "0.0.0";
+                    for (String version : versions) {
+                        if (version.matches(regex) && compareVersion(version, lastVersion) > 0) {
+                            lastVersion = version;
+                        }
                     }
                 }
             }
         }
-
-        AutoData.getInstance().getLogger().info("test");
     }
 
     @Override
