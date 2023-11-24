@@ -132,9 +132,9 @@ public class AutoData extends PluginBase {
         return null;
     }
 
-    public static MavenUpData getByMaven(PluginBase plugin, File file, String groupId, String artifactId) {
+    public static MavenUpData getByMaven(PluginBase plugin, File file, String groupId, String artifactId, String versionSuffix) {
         if (file.isFile()) {
-            return MavenUpData.getUpData(plugin, file, groupId, artifactId);
+            return MavenUpData.getUpData(plugin, file, groupId, artifactId, versionSuffix);
         }
         return null;
     }
@@ -165,8 +165,8 @@ public class AutoData extends PluginBase {
      * @param artifactId 插件maven artifactId
      * @return true 为 更新成功 建议在 onEnable 直接跳出 否则会有报错 false 是更新失败
      */
-    public static boolean defaultUpDataByMaven(PluginBase plugin, File file, String groupId, String artifactId) {
-        UpData data = AutoData.getByMaven(plugin, file, groupId, artifactId);
+    public static boolean defaultUpDataByMaven(PluginBase plugin, File file, String groupId, String artifactId, String versionSuffix) {
+        UpData data = AutoData.getByMaven(plugin, file, groupId, artifactId, versionSuffix);
         return defaultUpData0(plugin, data);
     }
 
