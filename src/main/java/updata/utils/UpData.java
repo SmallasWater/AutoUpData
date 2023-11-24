@@ -163,7 +163,7 @@ public abstract class UpData {
     /**
      * 比较版本
      */
-    private int compareVersion(String newVersion, String nowVersion) {
+    protected int compareVersion(String newVersion, String nowVersion) {
         if (newVersion.equalsIgnoreCase(nowVersion)) {
             return 0;
         }
